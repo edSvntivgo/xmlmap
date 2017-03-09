@@ -3,7 +3,7 @@
 <head>
 	<title></title>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	
+	<link rel="stylesheet" type="text/css" href="css/range.css">
 <style type="text/css">
 		#map{
 			overflow: hidden;
@@ -16,13 +16,20 @@
 <body style="margin:0px; padding:0px;">
 	<div id="capa">
 		<input id="pac-input" class="controls form-control" type="text" placeholder="Busqueda de Anuncios">
-		    <select id="radiusSelect" class="form-control">
-			      <option value="5" selected>5mi</option>
-			      <option value="10">10mi</option>
-			      <option value="25">25mi</option>
-			      <option value="100">100mi</option>
-			      <option value="200">200mi</option>
-		    </select>
+			
+		          <div class="range range-primary">
+		            <input id="radiusSelect" type="range" name="range" min="3" max="200" value="3" onchange="range.value=value">
+		            <output id="range">Radio en KM</output>
+		          </div>
+        	
+		    <!--<select id="radiusSelect" class="form-control">
+				<option value="3">3mi</option>
+			    <option value="5" selected>5mi</option>
+			    <option value="10">10mi</option>
+			    <option value="25">25mi</option>
+			    <option value="100">100mi</option>
+			    <option value="200">200mi</option>
+		    </select>-->
 	    <input class="btn btn-primary form-control" type="button" onclick="searchLocations()" value="Realizar Busqueda"/>
 	</div>
     <div>
@@ -115,7 +122,9 @@
 	function cargarpines(data) {
 		       var xml = parseXml(data);
 		       var markerNodes = xml.documentElement.getElementsByTagName("os_anuncios");
-		       console.log(markerNodes.length);
+		       if(markerNodes.length==0){
+		       		alert('no hay marcadores en la zona');
+		       }
 		       var bounds = new google.maps.LatLngBounds();
 			       for (var i = 0; i < markerNodes.length; i++) {
 				         var name = markerNodes[i].getAttribute("nombre");
@@ -124,12 +133,9 @@
 				         var latlng = new google.maps.LatLng(
 					              parseFloat(markerNodes[i].getAttribute("latitud")),
 					              parseFloat(markerNodes[i].getAttribute("longitud")));
-						//createOption(name, distance, i);
 				        createMarker(latlng, name, input);
-
 				        bounds.extend(latlng);
 	       			}
-	       		//map.fitBounds(bounds);
 		       	locationSelect.style.visibility = "visible";
 		       	locationSelect.onchange = function() {
 			         var markerNum = locationSelect.options[locationSelect.selectedIndex].value;
@@ -144,10 +150,13 @@
 		        position: latlng,
 		        icon:img
 	      });
+	      if(marker==0){
+	      	alert('no hay Anuncios en la zona');
+	      }
 	     	google.maps.event.addListener(marker, 'click', function() {
-	        infoWindow.setContent(html);
-	        infoWindow.open(map, marker);
-	      });
+		        infoWindow.setContent(html);
+		        infoWindow.open(map, marker);
+	      	});
 	     	var markerCluster = new MarkerClusterer(map,markers,{imagePath:'http://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
 	      markers.push(marker);
 	}
@@ -166,7 +175,6 @@
 
 	      request.onreadystatechange = function() {
 	        if (request.readyState == 4) {
-	        	console.log(request);
 	          request.onreadystatechange = doNothing;
 	          callback(request.responseText, request.status);
 

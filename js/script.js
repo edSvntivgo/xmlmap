@@ -40,9 +40,7 @@ function initAutocomplete() {
               });
             });
 
-            var markerCluster = new MarkerClusterer(map,markers,{ 
-              maxZoom: 10,
-              imagePath:'http://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+            var markerCluster = new MarkerClusterer(map,markers,{imagePath:'http://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
             var zona = new google.maps.Polygon({
                   paths:locations,
                   strokeColor: '#FFC300',
