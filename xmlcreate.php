@@ -6,7 +6,7 @@ $radius = $_GET["radius"];
 
 // Start XML file, create parent node
 $dom = new DOMDocument("1.0");
-$node = $dom->createElement("markers");
+$node = $dom->createElement("os_anuncios");
 $parnode = $dom->appendChild($node);
 
 // Opens a connection to a mySQL server
@@ -20,9 +20,8 @@ $db_selected = mysql_select_db('osmexico', $connection);
 if (!$db_selected) {
   die ("Can\'t use db : " . mysql_error());
 }
-
 // Search the rows in the markers table
-$query = sprintf("SELECT nombre,delegacion,latitud,longitud, ( 3959 * ACOS( COS( RADIANS( 37 ) ) * COS( RADIANS( latitud ) ) * COS( RADIANS( longitud ) - RADIANS( -122 ) ) + SIN( RADIANS( 37 ) ) * SIN( RADIANS( latitud ) ) ) ) AS distance FROM os_anuncios",
+$query = sprintf("SELECT nombre,delegacion,latitud,longitud,(3959 * ACOS( COS( RADIANS('%s') ) * COS( RADIANS( latitud ) ) * COS( RADIANS( longitud ) - RADIANS('%s') ) + SIN( RADIANS( '%s' ) ) * SIN( RADIANS( latitud ) ) ) ) AS distance FROM os_anuncios   where latitud<>'' and latitud<>0 and longitud <> '' and longitud <>0 and nombre <> '' and delegacion is not null HAVING distance < '%s'",
   mysql_real_escape_string($center_lat),
   mysql_real_escape_string($center_lng),
   mysql_real_escape_string($center_lat),
@@ -33,20 +32,26 @@ $result = mysql_query($query);
 if (!$result) {
   die("Invalid query: " . mysql_error());
 }
+//echo json_encode($result);
+header("Content-type: text/xml");
 
-//header("Content-type: text/xml");
-//echo $result;
 // Iterate through the rows, adding XML nodes for each
-while ($row = @mysql_fetch_assoc($result)){
-  /*$node = $dom->createElement("markers");
-  $newnode = $parnode->appendChild($node);
-  $newnode->setAttribute("nombre", $row['nombre']);
-  $newnode->setAttribute("delegacion", $row['delegacion']);
-  $newnode->setAttribute("latitud", $row['latitud']);
-  $newnode->setAttribute("longitud", $row['longitud']);
-  $newnode->setAttribute("distance", $row['distance']);*/
-  echo $row['distance']."<br>";
-}
 
-//echo $dom->saveXML();
+  while ($row = @mysql_fetch_assoc($result)){
+      if(strlen($row['nombre'])!=0 || strlen($row['latitud'])!=0 || strlen($row['longitud'])!=0 || strlen($row['delegacion'])!=0 || strlen($row['distance'])!=0){
+      $node = $dom->createElement("os_anuncios");
+      $newnode = $parnode->appendChild($node);
+      //$newnode->setAttribute("name", $row['nombre']);
+      //$newnode->setAttribute("delegacion", $row['delegacion']);
+      $newnode->setAttribute("latitud", $row['latitud']);
+      $newnode->setAttribute("longitud", $row['longitud']);
+      $newnode->setAttribute("distance", $row['distance']);
+      //echo $row['nombre']." / <br>";
+      //echo json_encode($row)."<br>";
+      }else{
+        //echo "campos vacios";
+      }
+  }  
+
+echo $dom->saveXML();
 ?>
