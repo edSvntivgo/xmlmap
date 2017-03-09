@@ -15,22 +15,11 @@
 </head>
 <body style="margin:0px; padding:0px;">
 	<div id="capa">
-		<input id="pac-input" class="controls form-control" type="text" placeholder="Busqueda de Anuncios">
-			
+		<input id="pac-input" class="controls form-control" type="text" placeholder="Busqueda de Anuncios">		
 		          <div class="range range-primary">
-		            <input id="radiusSelect" type="range" name="range" min="3" max="200" value="3" onchange="range.value=value">
+		            <input id="radiusSelect" type="range" name="range" min="3" max="200" value="3" onchange="searchLocations()" >
 		            <output id="range">Radio en KM</output>
 		          </div>
-        	
-		    <!--<select id="radiusSelect" class="form-control">
-				<option value="3">3mi</option>
-			    <option value="5" selected>5mi</option>
-			    <option value="10">10mi</option>
-			    <option value="25">25mi</option>
-			    <option value="100">100mi</option>
-			    <option value="200">200mi</option>
-		    </select>-->
-	    <input class="btn btn-primary form-control" type="button" onclick="searchLocations()" value="Realizar Busqueda"/>
 	</div>
     <div>
     	<select id="locationSelect" style="width:100%;visibility:hidden"></select>
@@ -156,8 +145,8 @@
 	     	google.maps.event.addListener(marker, 'click', function() {
 		        infoWindow.setContent(html);
 		        infoWindow.open(map, marker);
+		        setMapOnAll(null);
 	      	});
-	     	var markerCluster = new MarkerClusterer(map,markers,{imagePath:'http://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
 	      markers.push(marker);
 	}
 
