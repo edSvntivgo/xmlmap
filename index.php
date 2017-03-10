@@ -15,9 +15,9 @@
 </head>
 <body style="margin:0px; padding:0px;">
 	<div id="capa">
-		<input id="pac-input" class="controls form-control" type="text" placeholder="Busqueda de Anuncios">		
+		<input id="pac-input" class="controls form-control" type="text" placeholder="Busqueda de Anuncios" onchange="clearLocations()">		
 		          <div class="range range-primary">
-		            <input id="radiusSelect" type="range" name="range" min="3" max="200" value="3" onchange="searchLocations()" >
+		            <input id="radiusSelect" type="range" name="range" min="10" max="250" value="10" step="50" onchange="searchLocations()" >
 		            <output id="range">Radio en KM</output>
 		          </div>
 	</div>
@@ -53,6 +53,9 @@
 	      	};
 	     var input = document.getElementById('pac-input');
 	     var searchBox = new google.maps.places.SearchBox(input);
+	     if(!searchBox){
+	     	setMapOnAll(null);
+	     }
 	      map.controls[google.maps.ControlPosition.TOP_LEFT].push(document.getElementById('capa')); 
 	      map.addListener('bounds_changed', function() {
 	          searchBox.setBounds(map.getBounds());
@@ -61,17 +64,21 @@
 	      searchBox.addListener('places_changed', function() {
 	        var places = searchBox.getPlaces();
 	          if (places.length == 0) {
-	            return
+	            return  
 	          }          
 	          var bounds = new google.maps.LatLngBounds();
 	          places.forEach(function(place) {
 	            if (place.geometry.viewport) {
 	              bounds.union(place.geometry.viewport);
+					searchLocationsNear(place.geometry.location);
 	            } else {
 	              bounds.extend(place.geometry.location);
+	              searchLocationsNear(place.geometry.location);
 	            }
 	          });
 	          map.fitBounds(bounds);
+	         
+	         
 	      });    
 	}
 
@@ -80,8 +87,9 @@
 	     var geocoder = new google.maps.Geocoder();
 	     	geocoder.geocode({address: address}, function(results, status) {
 			       if (status == google.maps.GeocoderStatus.OK) {
-			        	searchLocationsNear(results[0].geometry.location,map);
-			       } else {
+			        	searchLocationsNear(results[0].geometry.location);
+
+			       }else {
 			         	alert(address + 'Escribe direccion');
 			       }
 	     	});
@@ -93,7 +101,6 @@
 	       		markers[i].setMap(null);
 	     }
 	     markers.length = 0;
-
 	     locationSelect.innerHTML = "";
 	     var option = document.createElement("option");
 		     option.value = "none";
@@ -103,7 +110,6 @@
 
 	function searchLocationsNear(center) {
 	     clearLocations();
-
 	     var radius = document.getElementById('radiusSelect').value;
 	     var searchUrl = 'xmlcreate.php?latitud=' + center.lat() + '&longitud=' + center.lng() + '&radius=' + radius;
 	     	downloadUrl(searchUrl, cargarpines);
@@ -145,7 +151,7 @@
 	     	google.maps.event.addListener(marker, 'click', function() {
 		        infoWindow.setContent(html);
 		        infoWindow.open(map, marker);
-		        setMapOnAll(null);
+		        
 	      	});
 	      markers.push(marker);
 	}
